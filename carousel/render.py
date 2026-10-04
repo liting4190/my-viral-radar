@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import re, os, html
 from PIL import Image, ImageOps, ImageEnhance, ImageFilter
+import sys; sys.path.insert(0, os.environ.get("EP","ep2"))
 from content import SLIDES
-SP="/tmp/claude-0/-home-claude-my-viral-radar/88fa76fe-e52b-5e73-a12f-e50faf6a33c6/scratchpad/ph/"
+SP=os.environ.get("PHOTOS","photos")+"/"
 HANDLE="@liting_21"; TOTAL=len(SLIDES); NPTS=sum(1 for s in SLIDES if s['kind']=="inner")
-os.makedirs("build",exist_ok=True); os.makedirs("out",exist_ok=True)
+os.makedirs("build",exist_ok=True); OUT=os.environ.get("EP","ep2")+"/out/"; os.makedirs(OUT,exist_ok=True)
 FONT="node_modules/@fontsource/"
 import json
 TARGET={"cover":690,"inner":510,"summary":590}
