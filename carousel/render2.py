@@ -68,6 +68,7 @@ body{width:1080px;height:1440px;background:#14100d;font-family:'Noto Sans SC',sa
 .b:before{content:"";position:absolute;left:2px;top:.62em;width:9px;height:9px;border-radius:50%;background:#e9b9b4}
 .para{font-size:32px;line-height:1.55;margin-bottom:26px}
 .li{display:flex;align-items:baseline;gap:16px;font-size:31px;line-height:1.5;margin-bottom:8px}.li b{font-family:'Noto Serif SC',serif;color:#ebcf8c;font-size:32px}
+.li+.para{margin-top:30px}
 .btn{display:inline-block;margin-top:18px;border:2px solid #ebcf8c;font-size:27px;letter-spacing:2px;padding:12px 30px;background:rgba(20,14,10,.35)}
 .band{position:absolute;bottom:78px;left:40px;max-width:1000px;background:#ead09a;color:#2b1d10;font-family:'Noto Serif SC',serif;font-weight:700;font-size:34px;line-height:1.4;padding:26px 54px 26px 40px}
 .R .band{left:auto;right:40px;padding:26px 40px 26px 54px}
