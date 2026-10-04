@@ -2,7 +2,7 @@
 # 每页：t1 白（key 用金）、t2 金；blocks: ("sec", 标签, [("p"|"b", 文字)]) / ("call", 文字) / ("para", 文字)
 import re
 SLIDES = [
- dict(n=1, kind="cover", photo="IMG_6769.DNG", head=(.33,.60,.26,.52), zoom=1.0, t1="浏览才100多？", t2="先查这5个地方", blocks=[
+ dict(n=1, kind="cover", photo="IMG_6769.DNG", head=(.33,.60,.26,.52), zoom=1.0, t1="浏览才100多？", t2="先别急着改内容", blocks=[
   ("para","你每天认真拍图、写文案，一篇接一篇地发。"),
   ("para","结果浏览只有100多，没人收藏，没人留言，也没人来问。"),
   ("para","【黄】越发越累，越发越没信心。【/黄】"),
