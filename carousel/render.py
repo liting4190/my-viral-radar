@@ -1,22 +1,31 @@
 # -*- coding: utf-8 -*-
 import re, os, html
 from PIL import Image, ImageOps, ImageEnhance, ImageFilter
-from copy import SLIDES
+from content import SLIDES
 SP="/tmp/claude-0/-home-claude-my-viral-radar/88fa76fe-e52b-5e73-a12f-e50faf6a33c6/scratchpad/ph/"
 HANDLE="@liting_21"; TOTAL=len(SLIDES); NPTS=sum(1 for s in SLIDES if s['kind']=="inner")
 os.makedirs("build",exist_ok=True); os.makedirs("out",exist_ok=True)
 FONT="node_modules/@fontsource/"
+import json
+TARGET={"cover":690,"inner":510,"summary":590}
 def prep(s):
     f=SP+s['photo']
     if not os.path.exists(f): f=SP+"new/"+s['photo']
     im=ImageOps.exif_transpose(Image.open(f)).convert('RGB')
-    W,H=1080,1440; sc=max(W/im.width,H/im.height)
+    W,H=1080,1440; sc=max(W/im.width,H/im.height)*s['zoom']
     im=im.resize((round(im.width*sc),round(im.height*sc)),Image.LANCZOS)
-    fx,fy=s['focus']; x=round((im.width-W)*fx/100); y=round((im.height-H)*fy/100)
-    im=im.crop((x,y,x+W,y+H)); dy=s['dy']
+    x0n,x1n,y0n,y1n=s['head']
+    fy0,fy1=y0n*im.height,y1n*im.height; fx0,fx1=x0n*im.width,x1n*im.width
+    cy=(fy0+fy1)/2; cx=(fx0+fx1)/2; tgt=TARGET[s['kind']]
+    y=round(cy-tgt); dy=0
+    if y<0: dy=min(-y,260); y=0
+    y=min(y,im.height-H)
+    x=min(max(round(cx-W/2),0),im.width-W)
+    crop=im.crop((x,y,x+W,y+H)); im=crop
     if dy:
-        c=Image.new('RGB',(W,H)); c.paste(im,(0,dy))
-        top=im.crop((0,0,W,dy)).transpose(Image.FLIP_TOP_BOTTOM).filter(ImageFilter.GaussianBlur(6)); c.paste(top,(0,0)); im=c
+        c=Image.new('RGB',(W,H)); c.paste(crop,(0,dy))
+        top=crop.crop((0,0,W,dy)).transpose(Image.FLIP_TOP_BOTTOM).filter(ImageFilter.GaussianBlur(6)); c.paste(top,(0,0)); im=c
+    json.dump(dict(l=fx0-x,r=fx1-x,t=fy0-y+dy,b=fy1-y+dy),open(f"build/face{s['n']}.json","w"))
     r,g,b=im.split(); r=r.point(lambda v:min(255,v*1.03)); b=b.point(lambda v:v*0.94)
     im=Image.merge('RGB',(r,g,b)); im=ImageEnhance.Color(im).enhance(0.94)
     im.save(f"build/p{s['n']}.jpg",quality=90)
@@ -41,14 +50,14 @@ body{width:1080px;height:1440px;background:#0b0908;font-family:'Noto Sans SC','W
 .body{position:absolute;left:85px;right:85px;text-shadow:0 2px 12px rgba(0,0,0,.65)}
 .lab{display:flex;align-items:center;gap:16px;font-size:25px;letter-spacing:8px;color:#e6c47d;margin-bottom:10px;font-weight:500}
 .lab:after{content:"";width:42px;height:1px;background:#e6c47d;opacity:.8}
-.sec{margin-bottom:30px}.sec p,.sec .b{font-size:36px;line-height:1.56;color:#fff;font-weight:400}
+.sec{margin-bottom:34px}.sec p,.sec .b{margin-bottom:6px;font-size:36px;line-height:1.5;color:#fff;font-weight:400}
 .b{position:relative;padding-left:26px}.b:before{content:"";position:absolute;left:2px;top:.66em;width:9px;height:9px;background:#e6c47d;transform:rotate(45deg)}
 .call{border-left:3px solid #e6c47d;padding-left:24px;font-size:38px;line-height:1.5;font-weight:500;margin-top:10px}
 /* cover */
 .cover .shade{background:linear-gradient(180deg,rgba(10,8,7,.62) 0%,rgba(10,8,7,.30) 20%,rgba(10,8,7,0) 34%,rgba(10,8,7,0) 52%,rgba(10,8,7,.80) 68%,rgba(10,8,7,.93) 100%)}
 .cover .title{top:128px;font-size:116px;line-height:1.14}
 .cover .rule{position:absolute;left:85px;top:440px;width:88px;height:3px;background:#e6c47d}
-.cover .body{top:1000px}.cover .body{right:60px}.cover .body p{font-size:32px;line-height:1.55;margin-bottom:20px;color:#fff}
+.cover .body{top:1000px}.cover .body{right:60px}.cover .body p{font-size:33px;line-height:1.55;margin-bottom:26px;color:#fff}
 /* inner */
 .inner .shade{background:linear-gradient(180deg,rgba(10,8,7,.78) 0%,rgba(10,8,7,.55) 14%,rgba(10,8,7,.14) 30%,rgba(10,8,7,0) 38%,rgba(10,8,7,.30) 46%,rgba(10,8,7,.86) 60%,rgba(10,8,7,.94) 100%)}
 .inner .title{top:130px;font-size:70px;line-height:1.22}
@@ -57,7 +66,7 @@ body{width:1080px;height:1440px;background:#0b0908;font-family:'Noto Sans SC','W
 .summary .shade{background:linear-gradient(180deg,rgba(10,8,7,.72) 0%,rgba(10,8,7,.45) 14%,rgba(10,8,7,.10) 30%,rgba(10,8,7,0) 38%,rgba(10,8,7,.35) 50%,rgba(10,8,7,.88) 62%,rgba(10,8,7,.94) 100%)}
 .summary .title{top:130px;font-size:84px;line-height:1.2}
 .summary .rule{position:absolute;left:85px;top:372px;width:88px;height:3px;background:#e6c47d}
-.summary .body{top:750px}
+.summary .body{top:790px}
 .li{display:flex;align-items:baseline;gap:22px;font-size:35px;line-height:1.5;margin-bottom:10px}.li b{font-family:'Noto Serif SC',serif;font-weight:700;color:#e6c47d;font-size:36px}
 .summary .para{font-size:36px;line-height:1.5;font-weight:500;margin-top:14px}
 .btn{display:inline-block;margin-top:26px;border:2px solid #e6c47d;color:#fff;font-size:30px;font-weight:500;letter-spacing:3px;padding:16px 40px;background:rgba(10,8,7,.35)}
@@ -66,7 +75,7 @@ LINKS="".join(f'<link rel=stylesheet href="../node_modules/@fontsource/{f}.css">
 ARROW='<svg class=arrow width="72" height="20" viewBox="0 0 72 20"><path d="M0 10H70M62 2l8 8-8 8" fill="none" stroke="#fff" stroke-width="1.6"/></svg>'
 for s in SLIDES:
     prep(s); k=s['kind']; n=s['n']
-    top=f'<div class=top><div class=kick>'+(f'要点 {n-1:02d}<span class=dash>'+"".join(f'<i class="{"on" if i==n-2 else ""}"></i>' for i in range(NPTS))+'</span>' if k=="inner" else '')+f'</div><div class=pg>{n:02d} / {TOTAL:02d}</div></div>'
+    top=f'<div class=top><div class=kick>'+(f'要点 {n-1:02d}<span class=dash>'+"".join(f'<i class="{"on" if i==n-2 else ""}"></i>' for i in range(NPTS))+'</span>' if k=="inner" else '')+f'</div></div>'
     out=[]
     for b in s['blocks']:
         t=b[0]
@@ -74,10 +83,10 @@ for s in SLIDES:
         elif t=="call": out.append(f'<div class=call>{Y(b[1])}</div>')
         elif t=="sec": out.append(f'<div class=sec><div class=lab>{b[1]}</div>'+"".join(f'<div class="{ "b" if ty=="b" else "pp"}">{Y(tx)}</div>' if ty=="b" else f'<p>{Y(tx)}</p>' for ty,tx in b[2])+'</div>')
         elif t=="list": out.append("".join(f'<div class=li><b>{a}</b><span>{html.escape(x)}</span></div>' for a,x in b[1]))
-        elif t=="btn": out.append(f'<div class=btn>{b[1]}　{HANDLE}</div>')
+        elif t=="btn": out.append(f'<div class=btn>{b[1]}</div>')
     rule='<div class=rule></div>' if k in("cover","summary") else ''
     arrow=ARROW if n<TOTAL else ''
     open(f"build/s{n}.html","w").write(f"""<!doctype html><meta charset=utf-8>{LINKS}<style>{CSS}</style><body class="{k}">
 <div class=ph style="background-image:url(p{n}.jpg)"></div><div class=shade></div>{top}
 <div class=title>{title(s['t1'],s['t2'])}</div>{rule}<div class=body>{''.join(out)}</div>
-<div class=foot>{HANDLE}</div>{arrow}</body>""")
+{arrow}</body>""")
