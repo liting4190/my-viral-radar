@@ -73,6 +73,7 @@ body{width:1080px;height:1440px;background:#14100d;font-family:'Noto Sans SC',sa
 .band{position:absolute;bottom:78px;left:40px;max-width:1000px;background:#ead09a;color:#2b1d10;font-family:'Noto Serif SC',serif;font-weight:700;font-size:34px;line-height:1.4;padding:26px 54px 26px 40px}
 .R .band{left:auto;right:40px;padding:26px 40px 26px 54px}
 .band .y{color:#8a4b14;font-weight:900}
+.num{font-size:1.5em;line-height:.8;vertical-align:-.04em;padding:0 .04em}
 """
 LINKS="".join(f'<link rel=stylesheet href="../node_modules/@fontsource/{f}.css">' for f in ("noto-serif-sc/700","noto-serif-sc/900","noto-sans-sc/400","noto-sans-sc/500"))
 TOP={"cover":480,"inner":330,"summary":330}
@@ -94,8 +95,9 @@ for s in SLIDES:
         elif t=="list": out.append("".join(f'<div class=li><b>{a}</b><span>{html.escape(x)}</span></div>' for a,x in b[1]))
         elif t=="btn": out.append(f'<div class=btn>{b[1]}</div>')
     t1=re.sub(r"「(.*?)」",r'<span class="g">「\1」</span>',s['t1'])
+    t2=re.sub(r"(\d+)",r'<span class="num">\1</span>',s['t2']) if s.get('bignum') else s['t2']
     open(f"build/s{n}.html","w").write(f"""<!doctype html><meta charset=utf-8>{LINKS}<style>{CSS}</style><body class="{k} {s['side']}">
 <div class=ph style="background-image:url(p{n}.jpg)"></div><div class=shade></div>
-<div class=title><div class=t1>{t1}</div><div class=t2>{s['t2']}</div></div>
+<div class=title><div class=t1>{t1}</div><div class=t2>{t2}</div></div>
 <div class=col style="top:{s.get('top',TOP[k])}px;width:{cw}px">{''.join(out)}</div>
 <div class=band style="clip-path:{brush(n)}">{Y(band.replace(chr(10),''))}</div></body>""")
